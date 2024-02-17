@@ -1,0 +1,328 @@
+* Encoding: UTF-8.
+*compute conditions*
+    *observed = 1, unobserved = 2*
+    
+if SO = 1 obcond = 1.
+if SU = 1 obcond = 2.
+if PO = 1 obcond = 1.
+if PU = 1 obcond = 2.
+execute.
+
+*sexual = 1, pathogen = 2*
+    
+if SO = 1 discond = 1.
+if SU = 1 discond = 1.
+if PO = 1 discond = 2.
+if PU = 1 discond = 2.
+execute.
+
+*create overall condition for later contrast tests*
+    
+if SO = 1 cond = 1.
+if SU = 1 cond = 2.
+if PO = 1 cond = 3.
+if PU = 1 cond = 4.
+execute.
+
+*create single disgust items across observed conditions*
+
+if obcond = 1 disgust1 = Disgust_Items_O_1.
+if obcond = 1 disgust2 = Disgust_Items_O_2.
+if obcond = 1 disgust3 = Disgust_Items_O_3.
+if obcond = 1 disgust4 = Disgust_Items_O_4.
+if obcond = 1 disgust5 = Disgust_Items_O_5.
+execute.
+
+if obcond = 2 disgust1 = Disgust_Items_U_1.
+if obcond = 2 disgust2 = Disgust_Items_U_2.
+if obcond = 2 disgust3 = Disgust_Items_U_3.
+if obcond = 2 disgust4 = Disgust_Items_U_4.
+if obcond = 2 disgust5 = Disgust_Items_U_5.
+execute.
+
+*same for cleaning wipe question*
+    
+if obcond = 1 clean = cleaning_wipe_O.
+if obcond = 2 clean = cleaning_wipe_U.
+execute.
+
+*same for blame items*
+    
+if obcond = 1 blame1 = blame_item_O_1.
+if obcond = 1 blame2 = blame_item_O_2.
+if obcond = 1 blame3 = blame_item_O_3.
+if obcond = 1 blame4 = blame_item_O_4.
+if obcond = 1 blame5 = blame_item_O_5.
+execute.
+
+
+if obcond = 2 blame1 = blame_item_U_1.
+if obcond = 2 blame2 = blame_item_U_2.
+if obcond = 2 blame3 = blame_item_U_3.
+if obcond = 2 blame4 = blame_item_U_4.
+if obcond = 2 blame5 = blame_item_U_5.
+execute.
+
+
+*recode disgust item 4*
+    
+recode disgust4 (1=7) (2=6) (3=5) (4=4) (5=3) (6=2) (7=1) INTO rdisgust4.
+execute.
+
+*check reliability of disgust items*
+    
+RELIABILITY
+  /VARIABLES=disgust1 disgust2 disgust3 disgust5 rdisgust4
+  /SCALE('Disgust Scale') ALL
+  /MODEL=ALPHA
+  /STATISTICS=DESCRIPTIVE SCALE
+  /SUMMARY=TOTAL.
+
+*create disgust composite*
+    
+compute totaldisgust = (disgust1 + disgust2 + disgust3 + rdisgust4 + disgust5)/5.
+execute.
+
+*recode blame item 4*
+    
+recode blame4 (1=7) (2=6) (3=5) (4=4) (5=3) (6=2) (7=1) INTO rblame4.
+execute.
+
+*check reliability of blame items*
+    
+RELIABILITY
+  /VARIABLES=blame1 blame2 blame3 rblame4 blame5
+  /SCALE('Blame Scale') ALL
+  /MODEL=ALPHA
+  /STATISTICS=DESCRIPTIVE SCALE
+  /SUMMARY=TOTAL.
+
+*create blame composite*
+    
+compute totalblame = (blame1 + blame2 + blame3 + rblame4 + blame5)/5.
+execute.
+
+*factorial ANOVA testing reported disgust*
+    
+UNIANOVA totaldisgust BY obcond discond
+  /METHOD=SSTYPE(3)
+  /INTERCEPT=INCLUDE
+  /EMMEANS=TABLES(obcond) 
+  /EMMEANS=TABLES(discond) 
+  /EMMEANS=TABLES(obcond*discond) 
+  /PRINT ETASQ DESCRIPTIVE OPOWER
+  /CRITERIA=ALPHA(.05)
+  /DESIGN=obcond discond obcond*discond.
+
+*factorial ANOVA testing reported blame*
+    
+UNIANOVA totalblame BY obcond discond
+  /METHOD=SSTYPE(3)
+  /INTERCEPT=INCLUDE
+  /EMMEANS=TABLES(obcond) 
+  /EMMEANS=TABLES(discond) 
+  /EMMEANS=TABLES(obcond*discond) 
+  /PRINT ETASQ DESCRIPTIVE OPOWER
+  /CRITERIA=ALPHA(.05)
+  /DESIGN=obcond discond obcond*discond.
+
+
+*factorial ANOVA testing cleaning wipe*
+    
+UNIANOVA clean BY obcond discond
+  /METHOD=SSTYPE(3)
+  /INTERCEPT=INCLUDE
+  /EMMEANS=TABLES(obcond) 
+  /EMMEANS=TABLES(discond) 
+  /EMMEANS=TABLES(obcond*discond) 
+  /PRINT ETASQ DESCRIPTIVE OPOWER
+  /CRITERIA=ALPHA(.05)
+  /DESIGN=obcond discond obcond*discond.
+
+*does reported disgust predict reported blame?*
+    
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER totaldisgust.
+
+*create dummy condition for observation*
+    
+if obcond = 1 dummycond = 1.
+if obcond = 2 dummycond = 0.
+execute.
+
+*mediation pathways for sexual disgust*
+
+temporary.
+select if discond = 1.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totaldisgust
+  /METHOD=ENTER dummycond.
+
+temporary.
+select if discond = 1.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER totaldisgust.
+
+temporary.
+select if discond = 1.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER dummycond.
+
+
+temporary.
+select if discond = 1.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER dummycond totaldisgust.
+
+
+*mediation pathways for pathogen disgust*
+    
+
+temporary.
+select if discond = 2.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totaldisgust
+  /METHOD=ENTER dummycond.
+
+temporary.
+select if discond = 2.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER totaldisgust.
+
+temporary.
+select if discond = 2.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER dummycond.
+
+
+temporary.
+select if discond = 2.
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER dummycond totaldisgust.
+
+*collapsing across disgust conditions*
+    
+
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totaldisgust
+  /METHOD=ENTER dummycond.
+
+
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER totaldisgust.
+
+
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER dummycond.
+
+
+REGRESSION
+  /MISSING LISTWISE
+  /STATISTICS COEFF OUTS R ANOVA
+  /CRITERIA=PIN(.05) POUT(.10) TOLERANCE(.0001)
+  /NOORIGIN 
+  /DEPENDENT totalblame
+  /METHOD=ENTER dummycond totaldisgust.
+
+*sex difference in disgust or blame?*
+    
+if gender = 1 dummysex = 1.
+if gender = 2 dummysex = 0.
+execute.
+
+
+UNIANOVA totaldisgust BY dummysex obcond discond
+  /METHOD=SSTYPE(3)
+  /INTERCEPT=INCLUDE
+  /EMMEANS=TABLES(dummysex) 
+  /EMMEANS=TABLES(obcond) 
+  /EMMEANS=TABLES(discond) 
+  /EMMEANS=TABLES(dummysex*obcond) 
+  /EMMEANS=TABLES(dummysex*discond) 
+  /EMMEANS=TABLES(obcond*discond) 
+  /EMMEANS=TABLES(dummysex*obcond*discond) 
+  /PRINT ETASQ DESCRIPTIVE
+  /CRITERIA=ALPHA(.05)
+  /DESIGN=dummysex obcond discond dummysex*obcond dummysex*discond obcond*discond 
+    dummysex*obcond*discond.
+
+
+
+UNIANOVA totalblame BY dummysex obcond discond
+  /METHOD=SSTYPE(3)
+  /INTERCEPT=INCLUDE
+  /EMMEANS=TABLES(dummysex) 
+  /EMMEANS=TABLES(obcond) 
+  /EMMEANS=TABLES(discond) 
+  /EMMEANS=TABLES(dummysex*obcond) 
+  /EMMEANS=TABLES(dummysex*discond) 
+  /EMMEANS=TABLES(obcond*discond) 
+  /EMMEANS=TABLES(dummysex*obcond*discond) 
+  /PRINT ETASQ DESCRIPTIVE
+  /CRITERIA=ALPHA(.05)
+  /DESIGN=dummysex obcond discond dummysex*obcond dummysex*discond obcond*discond 
+    dummysex*obcond*discond.
+
+
+
+CORRELATIONS
+  /VARIABLES=age totaldisgust totalblame
+  /PRINT=TWOTAIL NOSIG FULL
+  /MISSING=PAIRWISE.
