@@ -326,3 +326,50 @@ CORRELATIONS
   /VARIABLES=age totaldisgust totalblame
   /PRINT=TWOTAIL NOSIG FULL
   /MISSING=PAIRWISE.
+
+*recode word tasks*
+
+recode word_O_1 ('wash' = '1') ('Wash' = '1') ('WASH' = '1') (ELSE = 0) INTO word_1.
+execute.
+
+recode word_u_1 ('wash' = '1') ('Wash' = '1') ('WASH' = '1') (ELSE = 0) INTO word_1.
+execute.
+
+recode word_O_2 ('grass' = '1') ('Grass' = '1') ('GRASS' = '1') (ELSE = 0) INTO word_2.
+execute.
+
+recode word_u_2 ('grass' = '1') ('Grass' = '1') ('GRASS' = '1') (ELSE = 0) INTO word_2.
+execute.
+
+recode word_O_3 ('dirt' = '1') ('Dirt' = '1') ('DIRT' = '1') (ELSE = 0) INTO word_3.
+execute.
+
+recode word_u_3 ('dirt' = '1') ('Dirt' = '1') ('DIRT' = '1') (ELSE = 0) INTO word_3.
+execute.
+
+recode word_O_4 ('nasty' = '1') ('Nasty' = '1') ('NASTY' = '1') (ELSE = 0) INTO word_4.
+execute.
+
+recode word_u_4 ('nasty' = '1') ('Nasty' = '1') ('NASTY' = '1') (ELSE = 0) INTO word_4.
+execute.
+
+recode word_O_5 ('soap' = '1') ('Soap' = '1') ('SOAP' = '1') (ELSE = 0) INTO word_5.
+execute.
+
+recode word_u_5 ('soap' = '1') ('Soap' = '1') ('SOAP' = '1') (ELSE = 0) INTO word_5.
+execute.
+
+compute totalword = SUM(word_1,word_2,word_3,word_4,word_5).
+execute.
+
+*factorial ANOVA testing word task*
+    
+UNIANOVA totalword BY obcond discond
+  /METHOD=SSTYPE(3)
+  /INTERCEPT=INCLUDE
+  /EMMEANS=TABLES(obcond) 
+  /EMMEANS=TABLES(discond) 
+  /EMMEANS=TABLES(obcond*discond) 
+  /PRINT ETASQ DESCRIPTIVE OPOWER
+  /CRITERIA=ALPHA(.05)
+  /DESIGN=obcond discond obcond*discond.
