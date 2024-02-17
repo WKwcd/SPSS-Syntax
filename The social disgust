@@ -329,34 +329,46 @@ CORRELATIONS
 
 *recode word tasks*
 
-recode word_O_1 ('wash' = '1') ('Wash' = '1') ('WASH' = '1') (ELSE = 0) INTO word_1.
+recode word_o_1 ('wash' = '1') ('Wash' = '1') ('WASH' = '1') (ELSE = 0) INTO word_o_1_r.
 execute.
 
-recode word_u_1 ('wash' = '1') ('Wash' = '1') ('WASH' = '1') (ELSE = 0) INTO word_1.
+recode word_u_1 ('wash' = '1') ('Wash' = '1') ('WASH' = '1') (ELSE = 0) INTO word_u_1_r.
 execute.
 
-recode word_O_2 ('grass' = '1') ('Grass' = '1') ('GRASS' = '1') (ELSE = 0) INTO word_2.
+recode word_o_2 ('grass' = '1') ('Grass' = '1') ('GRASS' = '1') (ELSE = 0) INTO word_o_2_r.
 execute.
 
-recode word_u_2 ('grass' = '1') ('Grass' = '1') ('GRASS' = '1') (ELSE = 0) INTO word_2.
+recode word_u_2 ('grass' = '1') ('Grass' = '1') ('GRASS' = '1') (ELSE = 0) INTO word_u_2_r.
 execute.
 
-recode word_O_3 ('dirt' = '1') ('Dirt' = '1') ('DIRT' = '1') (ELSE = 0) INTO word_3.
+recode word_o_3 ('dirt' = '1') ('Dirt' = '1') ('DIRT' = '1') (ELSE = 0) INTO word_o_3_r.
 execute.
 
-recode word_u_3 ('dirt' = '1') ('Dirt' = '1') ('DIRT' = '1') (ELSE = 0) INTO word_3.
+recode word_u_3 ('dirt' = '1') ('Dirt' = '1') ('DIRT' = '1') (ELSE = 0) INTO word_u_3_r.
 execute.
 
-recode word_O_4 ('nasty' = '1') ('Nasty' = '1') ('NASTY' = '1') (ELSE = 0) INTO word_4.
+recode word_o_4 ('nasty' = '1') ('Nasty' = '1') ('NASTY' = '1') (ELSE = 0) INTO word_o_4_r.
 execute.
 
-recode word_u_4 ('nasty' = '1') ('Nasty' = '1') ('NASTY' = '1') (ELSE = 0) INTO word_4.
+recode word_u_4 ('nasty' = '1') ('Nasty' = '1') ('NASTY' = '1') (ELSE = 0) INTO word_u_4_r.
 execute.
 
-recode word_O_5 ('soap' = '1') ('Soap' = '1') ('SOAP' = '1') (ELSE = 0) INTO word_5.
+recode word_o_5 ('soap' = '1') ('Soap' = '1') ('SOAP' = '1') (ELSE = 0) INTO word_o_5_r.
 execute.
 
-recode word_u_5 ('soap' = '1') ('Soap' = '1') ('SOAP' = '1') (ELSE = 0) INTO word_5.
+recode word_u_5 ('soap' = '1') ('Soap' = '1') ('SOAP' = '1') (ELSE = 0) INTO word_u_5_r.
+execute.
+
+if obcond = 1 word_1 = word_o_1_r.
+if obcond = 2 word_1 = word_u_1_r.
+if obcond = 1 word_2 = word_o_2_r.
+if obcond = 2 word_2 = word_u_2_r.
+if obcond = 1 word_3 = word_o_3_r.
+if obcond = 2 word_3 = word_u_3_r.
+if obcond = 1 word_4 = word_o_4_r.
+if obcond = 2 word_4 = word_u_4_r.
+if obcond = 1 word_5 = word_o_5_r.
+if obcond = 2 word_5 = word_u_5_r.
 execute.
 
 compute totalword = SUM(word_1,word_2,word_3,word_4,word_5).
